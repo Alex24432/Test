@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>点线面关系判断</title>
+		<link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css"/>
+		<script src="../node_modules/leaflet/dist/leaflet.js"/>
+		<script src="../node_modules/turf/turf.js"/>
+	</head>
+	<body>
+		<div id="map" style="margin-top: 0px; margin-left: 0px;"></div>
+		<div id="statebar" style="width:300px; height:20px;"></div>
+		<p>leaflet调用geojson数据，实现点、线、面添加；</p>
+		<p>调用turf判断鼠标是否在所绘制多边形内部</p>
+		
+		<script type="text/javascript">
+			var map=L.map('map').setView([40,118],5);
+			map.on('mousemove',function(e){
+				document.getElementById('statebar').innerHTML=
+				JSON.stringify(e.containerPoint)+'<br/>'+
+				JSON.stringify(e.latlng)+'<br/>'+
+				mouseInPolygon([e.latlng.lat,e.latlng.lng],latlngs2);
+			});
+			
+			var myStyle={
+				"color":"#ccc",
+				"weight":3,
+				"opacity":0.5,
+			};
+			
+			$.getJSON('../../../Assets/geojson/sheng_jjj_geo.json',function(jsonData)
+			{
+				L.geoJSON(jsonData,{
+					style:myStyle
+				}).addTo(map)
+			});
+			
+			
+			var markers=[
+				[40,116],
+				[41,118],
+				[41,117]
+			];
+			
+			for(i=0;i<markers.length;i++)
+			{
+				L.marker(markers[i]).addTo(map);
+			}
+			
+			L.circle([40,118],{
+				color:'#AA0000',
+				fillColor:'#AA0000',
+				radius:1000,
+				fillOpacity:0.1
+			}).addTo(map);
+			
+			var lanlngs=[
+				[40,116],
+				[41,118],
+				[41,117],
+				[40.5,116]
+			];
+			var polyline=L.polylinne(lanlngs,{
+				color:'green'
+			}).addTo(map);
+			
+			var latlngs2=[
+				[40,116],
+				[41,118],
+				[41,117],
+				[40.5,116],
+				[40,116]
+			];
+			var polygon=L.polygon(latlngs2,,{
+				color:'red',
+				fillColor:'red',
+				weight:1
+			}).addTo(map);
+			
+			var popup=L.popup().setLatLng([40,116]).setContent('<p>Hello world!</br>This is a nice popup.</p>').openOn(map);
+			
+			function mouseInPolygon(point,polygon)
+			{
+				var poly1=turf.polygon([polygon]);
+				var pt1=turf.point(point);
+				
+				return turf.booleanPointInPolygon(pt1,poly1);
+			}
+		</script>
+	</body>
+</html>
